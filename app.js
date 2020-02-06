@@ -1,15 +1,20 @@
-const parse = require("csv-parse/lib/sync");
-const fs = require("fs");
-// csv파일을 읽기 위함
+const xlsx = require("xlsx");
 
-const csv = fs.readFileSync("csv/data.csv");
-// csv파일의 형식은 버퍼이다.
-// 버퍼는 이진수 0과 1로 이루어진 컴퓨터 친화적인 데이터이다
-const csvToString = csv.toString("utf-8");
-// 버퍼를 문자열로 바꿔줌
-// utf-8은 인코딩
-const records = parse(csvToString);
-// csv-parse의 parse메서드가 문자열을 2차원 배열로 변환
+const workbook = xlsx.readFile("xlsx/data.xlsx");
+// xlsx파일을 읽어들인다
+// 물론 가짜 xlsx파일을 만들어 놨기 때문에 읽히는 건 없다
+
+const ws = workbook.Sheets.영화목록;
+
+const records = xlsx.utils.sheet_to_json(ws);
+
 records.forEach((record, index) => {
-  console.log(index, record);
+  console.log(index, r.제목, r.링크);
 });
+
+// 위와 아래는 동일한 기능을 함
+
+for (const [index, record] of records.entries()) {
+  // 자바스크립트 객체.entries()를 쓰면 내부 배열이 [key, value]모양 배열로 바뀐다
+  console.log(index, record);
+}
