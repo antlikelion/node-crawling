@@ -1,4 +1,9 @@
 const xlsx = require("xlsx");
+const axios = require("axios");
+// ajax라이브러리
+// ajax로 요청을 해서 페이지에 대한 html을 응답으로 받아냄
+const cheerio = require("cheerio");
+// html파싱
 
 const workbook = xlsx.readFile("xlsx/data.xlsx");
 // xlsx파일을 읽어들인다
@@ -18,3 +23,20 @@ for (const [index, record] of records.entries()) {
   // 자바스크립트 객체.entries()를 쓰면 내부 배열이 [key, value]모양 배열로 바뀐다
   console.log(index, record);
 }
+
+const crawler = async () => {
+  await Promise.all(
+    records.map(async element => {
+      const response = await axios.get(element.링크);
+      //페이지(html)를 요청하는 코드
+      if (response.status === 200) {
+        const html = response.data;
+        console.log(html);
+        const $ = cheerio.load(html);
+        const text = $(".score.score_left .star_score").text();
+        console.log(element.제목, "평점", text.trim());
+      }
+    })
+  );
+};
+crawler();
