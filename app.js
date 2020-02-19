@@ -1,52 +1,38 @@
-const xlsx = require("xlsx");
-const axios = require("axios");
-// ajax라이브러리
-// ajax로 요청을 해서 페이지에 대한 html을 응답으로 받아냄
-const cheerio = require("cheerio");
-// html파싱
+const parse = require("csv-parse/lib/sync");
+const fs = require("fs");
+const puppeteer = require("puppeteer");
 
-const workbook = xlsx.readFile("xlsx/data.xlsx");
-// xlsx파일을 읽어들인다
-// 물론 가짜 xlsx파일을 만들어 놨기 때문에 읽히는 건 없다
-
-const ws = workbook.Sheets.영화목록;
-
-const records = xlsx.utils.sheet_to_json(ws);
-
-records.forEach((record, index) => {
-  console.log(index, r.제목, r.링크);
-});
-
-// 위와 아래는 동일한 기능을 함
-
-for (const [index, record] of records.entries()) {
-  // 자바스크립트 객체.entries()를 쓰면 내부 배열이 [key, value]모양 배열로 바뀐다
-  console.log(index, record);
-}
-// for of문은 await과 함께 쓰면 순서가 보장된다
+// const csv = fs.readFileSync("csv/data.csv");
+// const records = parse(csv.toString("utf-8"));
 
 const crawler = async () => {
-  for (const [index, element] of records.entries()) {
-    const response = await axios.get(element.링크);
-    if (response.status === 200) {
-      const html = response.data;
-      const $ = cheerio.load(html);
-      const text = $(".score.score_left .star_score").text();
-      //.text()가 태그는 무시하고 텍스트만 긁어옴
-      console.log(element.제목, "평점~", text.trim());
-    }
-  }
-  // await Promise.all(
-  //   records.map(async element => {
-  //     const response = await axios.get(element.링크);
-  //     //페이지(html)를 요청하는 코드
-  //     if (response.status === 200) {
-  //       const html = response.data;
-  //       const $ = cheerio.load(html);
-  //       const text = $(".score.score_left .star_score").text();
-  //       console.log(element.제목, "평점", text.trim());
-  //     }
-  //   })
-  // );
+  const browser = await puppeteer.launch({ headless: false });
+  //await은 프로미스가 resolve되기를 기다리는 것!
+  const page = await browser.newPage();
+  // 1.브라우저를 띄우고
+  const page2 = await browser.newPage();
+  // 2.새 탭을 띄우고
+  const page3 = await browser.newPage();
+  // 3.새 탭을 띄우고
+  await page.goto("https://zerocho.com");
+  // 4.첫번째 탭에서 제로초로 이동한다
+  await page2.goto("https://naver.com");
+  // 5.두번째 탭에서 제로초로 이동한다
+  await page3.goto("https://google.com");
+  // 6.세번째 탭에서 제로초로 이동한다
+  await page.waitFor(3000);
+  // 7.첫번째 탭을 띄우고 3초 기다린다.
+  await page2.waitFor(1000);
+  // 8.두번째 탭을 띄우고 1초 기다린다.
+  await page3.waitFor(2000);
+  // 9.세번째 탭을 띄우고 2초 기다린다.
+  await page.close();
+  // 10.첫번째 탭을 끈다(메모리 관리를 위함)
+  await page2.close();
+  // 11.두번째 탭을 끈다(메모리 관리를 위함)
+  await page3.close();
+  // 12.세번째 탭을 끈다(메모리 관리를 위함)
+  await browser.close();
+  // 13.브라우저를 끈다(메모리 관리를 위함)
 };
 crawler();
